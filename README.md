@@ -11,6 +11,11 @@
 
 Extended functions for working with MailJet
 
+- [Landing Page](https://www.mailjet.com/)
+- [Web App](https://app.mailjet.com/dashboard)
+- [Developer Docs](https://dev.mailjet.com/email/reference/)
+- [Official Python Client](https://pypi.org/project/mailjet-rest/)
+
 ## Table of Contents
 
 - [Usage](#usage)
