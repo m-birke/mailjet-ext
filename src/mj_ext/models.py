@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import Enum
 
 from pydantic import BaseModel
@@ -23,15 +24,32 @@ class MailjetMsgStatus(Enum):
 
 
 class MailjetMessage(BaseModel):
-    ArrivedAt: str
-    ContactID: int
-    MessageID: int
-    SenderID: int
-    Subject: str
-    Status: str
+    arrived_at: str
+    contact_id: int
+    message_id: int
+    sender_id: int
+    subject: str
+    status: str
 
 
 class MailjetContact(BaseModel):
-    ContactID: int
-    Email: str
-    Name: str
+    contact_id: int
+    email: str
+    name: str
+
+
+class MailjetMsgHistoryEvents(Enum):
+    SENT = "sent"
+    OPENED = "opened"
+    CLICKED = "clicked"
+    BOUNCED = "bounced"
+    SOFTBOUNCED = "softbounced"
+    HARDBOUNCED = "hardbounced"
+    BLOCKED = "blocked"
+    UNSUBSCRIBED = "unsub"
+    SPAM = "spam"
+
+
+class MailjetMsgHistoryEvent(BaseModel):
+    event: MailjetMsgHistoryEvents
+    timestamp: datetime

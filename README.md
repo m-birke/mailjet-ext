@@ -11,6 +11,8 @@
 
 Extended functions for working with MailJet
 
+Find reference [here](https://dev.mailjet.com/email/reference/messages/)
+
 - [Landing Page](https://www.mailjet.com/)
 - [Web App](https://app.mailjet.com/dashboard)
 - [Developer Docs](https://dev.mailjet.com/email/reference/)

@@ -3,20 +3,27 @@ from datetime import datetime, timedelta, timezone
 
 from mailjet_rest import Client
 
-from mj_ext.models import MailjetContact, MailjetMessage
+from mj_ext.models import MailjetContact, MailjetMessage, MailjetMsgHistoryEvent
 from mj_ext.utils import raise_for_status
 
+_MSG_STATUS_JSON_FIELD_NAME = "Status"
 
-def get_msg_status(mj_client: Client, msg_id: int) -> str:
+
+def get_msg(mj_client: Client, msg_id: int) -> dict:
     result = mj_client.message.get(id=msg_id)
     raise_for_status(result)
 
     data = result.json()["Data"]
 
     if len(data) > 1:
-        return "ambiguous respnse (more than one message with same id)"
+        msg = "Ambiguous response (more than one message with same id)"
+        raise ValueError(msg)
 
-    return data[0]["Status"]
+    return data[0]
+
+
+def get_msg_status(mj_client: Client, msg_id: int) -> str:
+    return get_msg(mj_client=mj_client, msg_id=msg_id)[_MSG_STATUS_JSON_FIELD_NAME]
 
 
 def get_msgs_per_status(mj_client: Client, days_into_past: int, status: int) -> list[MailjetMessage | None]:
@@ -40,13 +47,27 @@ def condense_msg(msg: dict) -> MailjetMessage | None:
         return None
 
     return MailjetMessage(
-        ArrivedAt=msg["ArrivedAt"],
-        ContactID=msg["ContactID"],
-        MessageID=msg["ID"],
-        SenderID=msg["SenderID"],
-        Subject=msg["Subject"],
-        Status=msg["Status"],
+        arrived_at=msg["ArrivedAt"],
+        contact_id=msg["ContactID"],
+        message_id=msg["ID"],
+        sender_id=msg["SenderID"],
+        subject=msg["Subject"],
+        status=msg["Status"],
     )
+
+
+def get_msg_history(mj_client: Client, msg_id: int) -> list[dict]:
+    result = mj_client.messagehistory.get(id=msg_id)
+    raise_for_status(result)
+
+    return result.json()["Data"]
+
+
+def parse_msg_history(msg_history: list[dict]) -> list[MailjetMsgHistoryEvent]:
+    return [
+        MailjetMsgHistoryEvent(event=el["EventType"], timestamp=datetime.fromtimestamp(el["EventAt"], timezone.utc))
+        for el in msg_history
+    ]
 
 
 def get_contact(mj_client: Client, contact_id: int) -> dict:
@@ -61,7 +82,7 @@ def condense_contact(contact: dict) -> MailjetContact | None:
         return None
 
     return MailjetContact(
-        ContactID=contact["ID"],
-        Email=contact["Email"],
-        Name=contact["Name"],
+        contact_id=contact["ID"],
+        email=contact["Email"],
+        name=contact["Name"],
     )
